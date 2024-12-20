@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-            jdk 'Java'
+            jdk 'Java17'
             maven 'Maven3'
     }
     environment {
@@ -47,14 +47,14 @@ pipeline {
      post {
             success {
                 mail(
-                    to: 'ibtissamhadik10@gmail.com',
+                    to: 'yassineifghane1234@gmail.com',
                     subject: 'Build Success',
                     body: 'Le build a été complété avec succès.'
                 )
             }
             failure {
                 mail(
-                    to: 'ibtissamhadik10@gmail.com',
+                    to: 'yassineifghane1234@gmail.com',
                     subject: 'Build Failed',
                     body: 'Le build a échoué.'
                 )
