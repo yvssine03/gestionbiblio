@@ -1,38 +1,40 @@
 pipeline {
     agent any
+    tools {
+            jdk 'Java'
+            maven 'Maven3'
+    }
     environment {
-        MAVEN_HOME = tool 'Maven'
-        SONAR_PROJECT_KEY = 'library-management'
-        SONAR_SCANNER_HOME = tool 'SonarQubeScanner'
+            REPO_URL = 'https://github.com/yvssine03/gestionbiblio.git'
+            SONARQUBE_CREDENTIALS_ID = 'sonar'
     }
     stages {
-        stage('Checkout') {
-            steps {
-                git url:'' , branch:'main'
-            }
-        }
+         stage('clean work-space') {
+                    steps {
+                        cleanWs()
+                    }
+         }
+         stage('Checkout from github') {
+                     steps {
+                         git branch: 'main',
+                         credentialsId: 'github',
+                         url: REPO_URL
+                     }
+         }
         stage('Build') {
             steps {
-                sh '${MAVEN_HOME}/bin/mvn clean compile'
+                sh 'mvn clean compile'
             }
         }
         stage('Test') {
             steps {
-                sh '${MAVEN_HOME}/bin/mvn test'
+                sh 'mvn test'
             }
         }
         stage('Quality Analysis') {
             steps {
-            withCredentials([string(credentialsId:'	sonar-token',variable:'	sonar-token')]){
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                        ${MAVEN_HOME}/bin/mvn clean verify sonar:sonar\
-                          -Dsonar.projectKey=library-management \
-                          -Dsonar.projectName='library-management' \
-                          -Dsonar.host.url=http://host.docker.internal:9000 \
-                          -Dsonar.token=sqp_77184bb20899618f745968eb22c6533d43755af1
-                        """
-                    }
+                withSonarQubeEnv(installationName: 'sonar' , credentialsId: SONARQUBE_CREDENTIALS_ID) {
+                                    sh 'mvn sonar:sonar'
                 }
             }
         }
@@ -42,16 +44,20 @@ pipeline {
             }
         }
     }
-    post {
-        success {
-            mail to: '',
-                subject: 'Build Success',
-                body: 'Le build a été complété avec succès.'
-        }
-        failure {
-            mail to: '',
-                subject: 'Build Failed',
-                body: 'Le build a échoué.'
-        }
-    }
+     post {
+            success {
+                mail(
+                    to: 'ibtissamhadik10@gmail.com',
+                    subject: 'Build Success',
+                    body: 'Le build a été complété avec succès.'
+                )
+            }
+            failure {
+                mail(
+                    to: 'ibtissamhadik10@gmail.com',
+                    subject: 'Build Failed',
+                    body: 'Le build a échoué.'
+                )
+            }
+     }
 }
